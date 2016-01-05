@@ -18,12 +18,22 @@ lambdr new projectName
 lambdr function:create signup
 ```
 
-#### Sync local code
+#### Deploy all functions
 ```
 lambdr function:deploy
 ```
 
-#### Release latest code
+#### Create a stage
 ```
-lambdr function:release
+lambdr stage:create staging
+```
+
+#### List stages
+```
+lambdr stage:list
+```
+
+#### Remove a stage
+```
+lambdr stage:remove staging
 ```
