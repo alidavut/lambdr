@@ -20,6 +20,7 @@ class Command {
       .then(() => this.checkStageExists())
       .then(() => this.removeRolePolicy())
       .then(() => this.removeRole())
+      .then(() => this.removeAPI())
       .then(() => this.setConfig())
       .then(() => this.finish())
       .catch(err => console.log(err.stack || err));
@@ -63,6 +64,23 @@ class Command {
       console.log('Removing role...');
 
       iam.deleteRole(variables, (err, data) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+  }
+
+  removeAPI() {
+    return new Promise((resolve, reject) => {
+      const config = utils.getConfig();
+      const apigateway = new AWS.APIGateway(this.awsCredentials);
+      const params = {
+        restApiId: config.stages[this.name].restApiId
+      };
+
+      console.log('Removing api...');
+
+      apigateway.deleteRestApi(params, err => {
         if (err) reject(err);
         else resolve();
       });

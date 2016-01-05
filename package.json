@@ -7,6 +7,7 @@
   "dependencies": {
     "aws-sdk": "^2.2.26",
     "commander": "^2.9.0",
+    "fs-extra": "^0.26.3",
     "inquirer": "^0.11.1",
     "lodash": "^3.10.1",
     "ncp": "^2.0.0",

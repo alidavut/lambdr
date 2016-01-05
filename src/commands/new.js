@@ -62,7 +62,7 @@ class Command {
 
   copyTemplate() {
     return new Promise((resolve, reject) => {
-      const source = path.join(__dirname, '../../template');
+      const source = path.join(__dirname, '../../templates/project');
 
       ncp(source, this.target, err => {
         if (err) reject(err);
@@ -118,7 +118,7 @@ class Command {
   generateAWSFile() {
     return new Promise((resolve, reject) => {
       const fileTarget = path.join(this.target, 'config', 'aws.json');
-      const content = JSON.stringify(this.awsCredentials, null, 4);
+      const content = JSON.stringify(this.awsCredentials, null, 2);
 
       fs.writeFile(fileTarget, content, err => {
         if (err) reject(err);
@@ -134,7 +134,7 @@ class Command {
         name: this.name
       };
 
-      fs.writeFile(fileTarget, JSON.stringify(variables, null, 4), err => {
+      fs.writeFile(fileTarget, JSON.stringify(variables, null, 2), err => {
         if (err) reject(err);
         else resolve();
       });
@@ -144,7 +144,7 @@ class Command {
   setConfig() {
     return new Promise((resolve, reject) => {
       const target = path.join(this.target, 'config', 'lambdr.json');
-      const content = JSON.stringify({ name: this.name }, null, 4);
+      const content = JSON.stringify({ name: this.name }, null, 2);
       fs.writeFile(target, content, err => {
         if (err) reject(err);
         else resolve();

@@ -17,7 +17,7 @@ exports.setConfig = (key, value) => new Promise((resolve, reject) => {
   const config = this.getConfig();
   config[key] = value;
 
-  const content = JSON.stringify(config, null, 4)
+  const content = JSON.stringify(config, null, 2)
   fs.writeFile(lambdrPath, content, err => {
     if (err) reject(err);
     else resolve();

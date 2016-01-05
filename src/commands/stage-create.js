@@ -20,6 +20,7 @@ class Command {
       .then(() => this.checkStageExists())
       .then(() => this.createRole())
       .then(() => this.createRolePolicy())
+      .then(() => this.createAPI())
       .then(() => this.setConfig())
       .then(() => this.finish())
       .catch(err => console.log(err.stack || err));
@@ -73,10 +74,30 @@ class Command {
     });
   }
 
+  createAPI() {
+    return new Promise((resolve, reject) => {
+      const config = utils.getConfig();
+      const apigateway = new AWS.APIGateway(this.awsCredentials);
+      const params = {
+        name: `${config.name}-${this.name}`
+      };
+
+      console.log('Creating api...');
+
+      apigateway.createRestApi(params, (err, data) => {
+        if (err) reject(err);
+        else {
+          this.restApiId = data.id;
+          resolve();
+        }
+      });
+    });
+  }
+
   setConfig() {
     const config = utils.getConfig();
     config.stages = config.stages || {};
-    config.stages[this.name] = {};
+    config.stages[this.name] = { restApiId: this.restApiId };
     return utils.setConfig('stages', config.stages);
   }
 
