@@ -26,10 +26,9 @@ class Command {
       .then(() => this.copyTemplate())
       .then(() => this.getCredentials())
       .then(() => this.verifyCredentials())
-      .then(() => this.createRole())
-      .then(() => this.createRolePolicy())
       .then(() => this.generateAWSFile())
       .then(() => this.generatePackageJSON())
+      .then(() => this.setConfig())
       .then(this.finish)
       .catch(err => {
         console.log(err);
@@ -116,54 +115,12 @@ class Command {
     });
   }
 
-  createRole() {
-    return new Promise((resolve, reject) => {
-      const iam = new AWS.IAM(this.awsCredentials);
-      const policy = JSON.stringify(utils.getAssumeRolePolicyDocument())
-      const variables = {
-        AssumeRolePolicyDocument: policy,
-        RoleName: `lambdr_${this.name}_executions`
-      }
-
-      console.log('Creating role...');
-
-      iam.createRole(variables, (err, data) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
-  }
-
-  createRolePolicy() {
-    return new Promise((resolve, reject) => {
-      const iam = new AWS.IAM(this.awsCredentials);
-      const policy = JSON.stringify(utils.getPolicyDocument(this.region))
-      const variables = {
-        PolicyDocument: policy,
-        RoleName: `lambdr_${this.name}_executions`,
-        PolicyName: `lambdr_${this.name}_executions_policy`
-      }
-
-      console.log('Adding role policy...');
-
-      iam.putRolePolicy(variables, (err, data) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
-  }
-
   generateAWSFile() {
     return new Promise((resolve, reject) => {
-      const fileTarget = path.join(this.target, './.lambdr/aws.json');
-      const variables = {
-        accessKeyId: this.key,
-        secretAccessKey: this.secret,
-        region: this.region,
-        project: this.name
-      }
+      const fileTarget = path.join(this.target, 'config', 'aws.json');
+      const content = JSON.stringify(this.awsCredentials, null, 4);
 
-      fs.writeFile(fileTarget, JSON.stringify(variables, null, 4), err => {
+      fs.writeFile(fileTarget, content, err => {
         if (err) reject(err);
         else resolve();
       });
@@ -181,6 +138,17 @@ class Command {
         if (err) reject(err);
         else resolve();
       });
+    });
+  }
+
+  setConfig() {
+    return new Promise((resolve, reject) => {
+      const target = path.join(this.target, 'config', 'lambdr.json');
+      const content = JSON.stringify({ name: this.name }, null, 4);
+      fs.writeFile(target, content, err => {
+        if (err) reject(err);
+        else resolve();
+      })
     });
   }
 

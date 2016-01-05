@@ -19,9 +19,23 @@ program
   .description('deploys a function')
   .action(require('./commands/function-deploy'));
 
-  program
-    .command('function:release <functionName>')
-    .description('deploys a function')
-    .action(require('./commands/function-release'));
+program
+  .command('stage:create')
+  .description('creates a new stage')
+  .action(require('./commands/stage-create'));
+
+program
+  .command('stage:list')
+  .description('lists all stages')
+  .action(require('./commands/stage-list'));
+
+program
+  .command('stage:remove <stageName>')
+  .description('removes a stage')
+  .action(require('./commands/stage-remove'));
 
 program.parse(process.argv);
+
+if (!process.argv.slice(2).length) {
+  program.outputHelp();
+}
