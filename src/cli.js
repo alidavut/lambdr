@@ -20,7 +20,7 @@ program
   .action(require('./commands/function-create'));
 
 program
-  .command('function:deploy [functionName]')
+  .command('function:deploy <functionName> <stageName>')
   .description('deploys a function')
   .action(require('./commands/function-deploy'));
 

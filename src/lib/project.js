@@ -78,10 +78,12 @@ class Project {
     console.log('Verifying aws credentials...');
     return AWSHelper.verifyCredentials(this.credentials)
       .then(() => this.copyTemplate())
-      .then(() => {
+      .then(() => AWSHelper.getUser(this.credentials))
+      .then(user => {
         this.credentials = this._credentials;
         this.generatePackageJSON();
         this.config.create();
+        this.config.set('accountId', user.UserId);
         this.config.set('name', this.name);
       });
   }

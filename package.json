@@ -5,6 +5,7 @@
     "lambdr": "./bin/lambdr"
   },
   "dependencies": {
+    "archiver": "^0.21.0",
     "aws-sdk": "^2.2.26",
     "commander": "^2.9.0",
     "fs-extra": "^0.26.3",

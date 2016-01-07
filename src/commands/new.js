@@ -3,6 +3,7 @@
 const Project = require('../lib/project');
 const inquirer = require('inquirer');
 const path = require('path');
+const fs = require('fs');
 
 module.exports = (name) => {
   const command = new Command(name);
@@ -12,11 +13,13 @@ module.exports = (name) => {
 class Command {
   constructor(name) {
     this.name = name;
-    this.project = new Project(path.join(process.cwd(), this.name), this.name);
+    this.path = path.join(process.cwd(), this.name);
+    this.project = new Project(this.path, this.name);
   }
 
   start() {
-    return this.getCredentials()
+    return this.checkDirectory()
+      .then(() => this.getCredentials())
       .then(() => this.project.save())
       .then(this.finish)
       .catch(err => {
@@ -25,6 +28,14 @@ class Command {
           console.log('Operation aborted!');
         });
       });
+  }
+
+  checkDirectory() {
+    return new Promise((resolve, reject) => {
+      if (fs.existsSync(this.path))
+        console.log(`There is already a folder named ${this.name}`);
+      else resolve();
+    })
   }
 
   getCredentials() {
