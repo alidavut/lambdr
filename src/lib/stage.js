@@ -37,6 +37,22 @@ class Stage {
     });
   }
 
+  save() {
+    const credentials = this.project.credentials;
+    const stage = this.name;
+    const project = this.project.name;
+
+    return AWSHelper.createRole(credentials, project, stage)
+      .then(() => AWSHelper.createRolePolicy(credentials, project, stage))
+      .then(() => AWSHelper.createApi(credentials, project, stage))
+      .then(apiId => {
+        const stages = this.project.config.get('stages') || {};
+        stages[this.name] = stages[this.name] || {};
+        stages[this.name].restApiId = apiId;
+        this.project.config.set('stages', stages);
+      });
+  }
+
   remove() {
     const credentials = this.project.credentials;
     const stage = this.name;
