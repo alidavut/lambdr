@@ -1,97 +1,26 @@
 "use strict";
 
-const utils = require('../utils');
-const AWS = require('aws-sdk');
+const Stage = require('../lib/stage');
 
 module.exports = (name) => {
-  const command = new Command(name);
+  const command = new Command(global.project, name);
   return command.start();
 }
 
 class Command {
-  constructor(name) {
+  constructor(project, name) {
+    this.project = project;
     this.name = name;
-    this.awsCredentials = utils.getCredentials();
   }
 
   start() {
-    return utils
-      .checkLambdrProject()
-      .then(() => this.checkStageExists())
-      .then(() => this.removeRolePolicy())
-      .then(() => this.removeRole())
-      .then(() => this.removeAPI())
-      .then(() => this.setConfig())
+    return this.project.correct()
+      .then(() => Stage.find(this.project, this.name))
+      .then(stage => {
+        return stage.remove();
+      })
       .then(() => this.finish())
       .catch(err => console.log(err.stack || err));
-  }
-
-  checkStageExists() {
-    return new Promise((resolve, reject) => {
-      const stages = utils.getConfig().stages;
-
-      if (!stages || !stages[this.name]) reject('Stage doesn\'t exist.');
-      else resolve();
-    });
-  }
-
-  removeRolePolicy() {
-    return new Promise((resolve, reject) => {
-      const config = utils.getConfig();
-      const iam = new AWS.IAM(this.awsCredentials);
-      const variables = {
-        RoleName: `lambdr_${config.name}_${this.name}`,
-        PolicyName: `lambdr_${config.name}_${this.name}_policy`
-      }
-
-      console.log('Removing role policy...');
-
-      iam.deleteRolePolicy(variables, (err, data) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
-  }
-
-  removeRole() {
-    return new Promise((resolve, reject) => {
-      const config = utils.getConfig();
-      const iam = new AWS.IAM(this.awsCredentials);
-      const variables = {
-        RoleName: `lambdr_${config.name}_${this.name}`
-      }
-
-      console.log('Removing role...');
-
-      iam.deleteRole(variables, (err, data) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
-  }
-
-  removeAPI() {
-    return new Promise((resolve, reject) => {
-      const config = utils.getConfig();
-      const apigateway = new AWS.APIGateway(this.awsCredentials);
-      const params = {
-        restApiId: config.stages[this.name].restApiId
-      };
-
-      console.log('Removing api...');
-
-      apigateway.deleteRestApi(params, err => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
-  }
-
-  setConfig() {
-    const config = utils.getConfig();
-    config.stages = config.stages || {};
-    delete(config.stages[this.name]);
-    return utils.setConfig('stages', config.stages);
   }
 
   finish() {

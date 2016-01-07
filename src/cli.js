@@ -1,4 +1,9 @@
-var program = require('commander');
+"use strict";
+
+const Project = require('./lib/project');
+const program = require('commander');
+
+global.project = new Project(process.cwd());
 
 program
   .version('0.0.1')

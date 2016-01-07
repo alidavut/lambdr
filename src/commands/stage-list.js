@@ -1,28 +1,32 @@
 "use strict";
 
-const utils = require('../utils');
+const Stage = require('../lib/stage');
 
 module.exports = () => {
-  const command = new Command();
+  const command = new Command(global.project);
   return command.start();
 }
 
 class Command {
-  constructor() {
+  constructor(project) {
+    this.project = project;
   }
 
   start() {
-    return utils
-      .checkLambdrProject()
+    return this.project.correct()
       .then(() => this.list())
       .catch(err => console.log(err.stack || err));
   }
 
   list() {
-    const config = utils.getConfig();
+    const stages = Stage.all(this.project);
 
-    Object.keys(config.stages).forEach(key => {
-      console.log(`* ${key}`);
-    });
+    if (stages.length) {
+      stages.forEach(stage => {
+        console.log((`* ${stage.name}`));
+      });
+    } else {
+      console.log('No stages added.');
+    }
   }
 }

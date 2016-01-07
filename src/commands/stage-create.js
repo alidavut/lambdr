@@ -2,21 +2,22 @@
 
 const utils = require('../utils');
 const AWS = require('aws-sdk');
+const Project = require('../lib/project');
 
 module.exports = (name) => {
-  const command = new Command(name);
+  const command = new Command(global.project, name);
   return command.start();
 }
 
 class Command {
-  constructor(name) {
+  constructor(project, name) {
+    this.project = project;
     this.name = name;
     this.awsCredentials = utils.getCredentials();
   }
 
   start() {
-    return utils
-      .checkLambdrProject()
+    return this.project.correct()
       .then(() => this.checkStageExists())
       .then(() => this.createRole())
       .then(() => this.createRolePolicy())
