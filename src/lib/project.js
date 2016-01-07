@@ -17,6 +17,7 @@ class Project {
     this.credentialsPath = this.path('config', 'aws.json');
     this.envPath = this.path('config', 'env.json');
     this.config = new Config(this);
+    this.envVariables = new Config(this, this.envPath);
   }
 
   get credentials() {

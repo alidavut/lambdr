@@ -50,6 +50,7 @@ class Stage {
         stages[this.name] = stages[this.name] || {};
         stages[this.name].restApiId = apiId;
         this.project.config.set('stages', stages);
+        this.project.envVariables.set(this.name, {});
       });
   }
 

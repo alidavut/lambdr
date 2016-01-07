@@ -3,16 +3,17 @@
 const fs = require('fs');
 
 class Config {
-  constructor(project) {
+  constructor(project, configPath) {
     this.project = project;
+    this.configPath = configPath || this.project.configPath
   }
 
   create() {
-    fs.writeFileSync(this.project.configPath, '{}');
+    fs.writeFileSync(this.configPath, '{}');
   }
 
   get all() {
-    return require(this.project.configPath);
+    return require(this.configPath);
   }
 
   get(key) {
@@ -22,7 +23,7 @@ class Config {
   set(key, value) {
     const config = this.all;
     config[key] = value;
-    fs.writeFileSync(this.project.configPath, JSON.stringify(config, null, 2));
+    fs.writeFileSync(this.configPath, JSON.stringify(config, null, 2));
   }
 }
 

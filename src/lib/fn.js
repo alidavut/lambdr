@@ -35,6 +35,10 @@ class Fn {
     return this.project.config.get('functions')[this.name];
   }
 
+  get path() {
+    return this.project.path('functions', this.name + '.js')
+  }
+
   copyTemplate() {
     return new Promise((resolve, reject) => {
       const source = Utils.modulePath('templates', 'function.js');
@@ -115,7 +119,7 @@ class Fn {
     });
   }
 
-  zip() {
+  zip(stage) {
     console.log('Preparing zip file...');
 
     return this.removeTemp()
@@ -132,20 +136,37 @@ class Fn {
           else resolve();
         });
       }))
+      .then(() => this.deleteSensitiveFiles())
+      .then(() => this.wrapFunction(stage))
       .then(() => new Promise((resolve, reject) => {
-        const out = fs.createWriteStream(Utils.modulePath('.deploy', 'code.zip'));
         const archive = archiver('zip');
-
-        out.on('close', resolve);
+        const out = fs.createWriteStream(Utils.modulePath('.deploy/code.zip'));
         archive.on('error', reject);
+        archive.on('end', resolve);
         archive.pipe(out);
-        archive.bulk([{
-          cwd: Utils.modulePath('.deploy', 'codes'),
-          src: ['**'],
-          flatten: true
-        }]);
+        archive.file(Utils.modulePath('templates', 'lambdr.js'), { name: 'lambdr.js' });
+        archive.directory(Utils.modulePath('.deploy', 'codes'), '');
         archive.finalize();
       }));
+  }
+
+  deleteSensitiveFiles() {
+    return new Promise((resolve, reject) => {
+      fs.removeSync(Utils.modulePath('.deploy', 'codes', 'config', 'aws.json'));
+      resolve();
+    });
+  }
+
+  wrapFunction(stage) {
+    return new Promise(resolve => {
+      const fnTarget = Utils.modulePath('.deploy', 'codes', 'functions', this.name + '.js');
+      const file = fs.readFileSync(this.path);
+
+      let wrapped = `process.env.NODE_ENV="${stage.name}";\n`;
+      wrapped += `require('../lambdr');\n${file}`;
+      fs.writeFileSync(fnTarget, wrapped);
+      resolve();
+    });
   }
 
   syncFunction(stage) {
@@ -162,7 +183,7 @@ class Fn {
   }
 
   deploy(stage) {
-    return this.zip()
+    return this.zip(stage)
       .then(() => this.syncFunction(stage))
       .then(() => this.createEndpoint(stage))
       .then(() => this.removeTemp());
