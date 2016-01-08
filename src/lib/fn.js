@@ -120,8 +120,6 @@ class Fn {
   }
 
   zip(stage) {
-    console.log('Preparing zip file...');
-
     return this.removeTemp()
       .then(() => new Promise(resolve => {
         fs.mkdirSync(Utils.modulePath('.deploy'));
@@ -132,6 +130,7 @@ class Fn {
         const target = Utils.modulePath('.deploy', 'codes');
 
         ncp(source, target, err => {
+          fs.copySync(Utils.modulePath('templates', 'lambdr.js'), `${target}/lambdr.js`);
           if (err) reject(err);
           else resolve();
         });
@@ -144,7 +143,6 @@ class Fn {
         out.on('close', resolve);
         archive.on('error', reject);
         archive.pipe(out);
-        archive.file(Utils.modulePath('templates', 'lambdr.js'), { name: 'lambdr.js' });
         archive.directory(Utils.modulePath('.deploy', 'codes'), '');
         archive.finalize();
       }));
@@ -183,6 +181,8 @@ class Fn {
   }
 
   deploy(stage) {
+    console.log('Preparing zip file...');
+
     return this.zip(stage)
       .then(() => this.syncFunction(stage))
       .then(() => this.createEndpoint(stage))
@@ -196,8 +196,27 @@ class Fn {
         functions[this.name] = functions[this.name] || {};
         functions[this.name].method = this.method;
         functions[this.name].endpoint = this.endpoint;
+        functions[this.name].testEvent = {};
         this.project.config.set('functions', functions);
       });
+  }
+
+  run() {
+    return this.zip({ name: 'local' })
+      .then(() => new Promise((resolve, reject) => {
+        const fnModule = require(`../../.deploy/codes/functions/${this.name}`);
+        const context = {
+          done: (err, res) => {
+            if (err) reject(err);
+            else resolve(res);
+          }
+        };
+
+        fnModule.handler(this.config.testEvent, context);
+      }))
+      .then(console.log)
+      .catch(console.log)
+      .then(() => this.removeTemp());
   }
 }
 

@@ -25,6 +25,11 @@ program
   .action(require('./commands/function-deploy'));
 
 program
+  .command('function:run <functionName>')
+  .description('executes a lambda function')
+  .action(require('./commands/function-run'));
+
+program
   .command('stage:create')
   .description('creates a new stage')
   .action(require('./commands/stage-create'));
