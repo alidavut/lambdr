@@ -6,7 +6,7 @@ const program = require('commander');
 global.project = new Project(process.cwd());
 
 program
-  .version('0.0.1')
+  .version('0.0.3')
   .description('Lambdr');
 
 program

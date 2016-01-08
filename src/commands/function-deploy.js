@@ -18,15 +18,17 @@ class Command {
   start() {
     return this.project.correct()
       .then(() => Stage.find(this.project, this.stage))
-      .then(stage => Fn.find(this.project, this.name).then(fn => ({ fn: fn, stage: stage })))
-      .then(res => res.fn.deploy(res.stage).then(() => res))
-      .then(res => this.finish(res))
+      .then(stage => this.stage = stage)
+      .then(() => Fn.find(this.project, this.name))
+      .then(fn => this.fn = fn)
+      .then(() => this.fn.deploy(this.stage))
+      .then(() => this.finish())
       .catch(err => console.log(err.stack || err));
   }
 
-  finish(res) {
-    const apiId = res.stage.config.restApiId;
+  finish() {
+    const apiId = this.stage.config.restApiId;
     console.log('The function has been deployed to:');
-    console.log(`https://${apiId}.execute-api.us-east-1.amazonaws.com/lambdr/${this.name}`);
+    console.log(`https://${apiId}.execute-api.us-east-1.amazonaws.com/lambdr${this.fn.config.endpoint}`);
   }
 }

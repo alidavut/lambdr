@@ -141,8 +141,8 @@ class Fn {
       .then(() => new Promise((resolve, reject) => {
         const archive = archiver('zip');
         const out = fs.createWriteStream(Utils.modulePath('.deploy/code.zip'));
+        out.on('close', resolve);
         archive.on('error', reject);
-        archive.on('end', resolve);
         archive.pipe(out);
         archive.file(Utils.modulePath('templates', 'lambdr.js'), { name: 'lambdr.js' });
         archive.directory(Utils.modulePath('.deploy', 'codes'), '');
