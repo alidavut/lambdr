@@ -46,7 +46,7 @@ lambdr function:run signup
 ```
 
 Before running a function you can pass ```event``` parameters by changing ```testEvents``` function property in ```config/lambdr.json```.
-```
+```javascript
 {
   "accountId": "123456789",
   "name": "my-micro-service",
@@ -81,7 +81,7 @@ We deployed signup function into development stage. After this command you will 
 
 ### Using environment variables
 Lambdr deploys environment variables for it's own stage. You can set environment variables in ```config/env.json``` file. An example ```env.json```:
-```
+```javascript
 {
   "default": {
     "APP_NAME": "Example OAuth Micro Service",
@@ -101,7 +101,7 @@ Lambdr deploys environment variables for it's own stage. You can set environment
 
 Notice that ```TEST_STAGE``` will be overridden in production stage.
 
-```
+```javascript
 exports.handler = function(event, context) {
   if (process.env.TEST_STAGE) {
     context.done(null, 'This stage is for testing');
