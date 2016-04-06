@@ -47,7 +47,10 @@ class Command {
           message: 'Select you region :',
           choices: [
             'us-east-1',
-            'us-east-2'
+            'us-east-2',
+            'eu-west-1',
+            'eu-central-1',
+            'ap-northeast-1'
           ]
         },
         {
